@@ -1,15 +1,16 @@
-# [Project name]
+# GigFinder
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A Western European job-source comparison and follow-up website.
 
 ## Run & Operate
 
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- Frontend managed workflow: `artifacts/gigfinder: web`
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Job discovery uses public APIs; no database or provider secret is needed for the current feature.
 
 ## Stack
 
@@ -22,23 +23,36 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- Frontend: `artifacts/gigfinder`
+- Source directory and direct-search URL builders: `artifacts/api-server/src/lib/job-sources.ts`
+- Public feed adapters, cache and filtering: `artifacts/api-server/src/lib/job-feeds.ts`
+- API routes: `artifacts/api-server/src/routes/jobs.ts`
+- API contract: `lib/api-spec/openapi.yaml`
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Never fabricate job counts. Unknown or restricted source counts must remain null and be visibly separated from real zero matches.
+- Feed counts are observed samples, never site-wide inventory; show scope and publisher delays.
+- Full-time describes hours, not duration; do not infer permanent from full-time.
+- Remotive permits only a few refreshes per day. Keep at least six hours between upstream refreshes and retain attribution/source links. Before horizontal scaling, make cache and request coordination shared and durable.
+- Follow-up saves are browser-only in this version; no local authentication or account syncing is implied.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Search available feeds by job title, city, industry and offer type.
+- Compare source counts and browse the 25-board directory.
+- Save job cards and source searches for follow-up.
+- See README for coverage limitations and provider documentation.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- GigFinder focuses on Western Europe.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Regenerate clients after OpenAPI changes. Orval must target React Query v5.
+- Shared browser client needs DOM iterable types for generated header handling.
+- Use managed workflows for service environment and routing, never duplicate dev servers.
 
 ## Pointers
 

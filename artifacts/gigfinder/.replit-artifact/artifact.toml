@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "GigFinder"
+description = "Explore 25 leading job boards across Western Europe, filter opportunities, compare verified source counts, and save jobs for follow-up."
+version = "1.0.0"
+id = "artifacts/gigfinder"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23740
+
+[services.development]
+run = "pnpm --filter @workspace/gigfinder run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/gigfinder", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/gigfinder/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23740"
+BASE_PATH = "/"

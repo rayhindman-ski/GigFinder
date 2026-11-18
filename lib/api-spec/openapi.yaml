@@ -11,6 +11,37 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /sources:
+    get:
+      operationId: getSources
+      summary: Curated Western European job sources
+      responses:
+        "200":
+          description: Job board directory
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Source" }
+  /scan:
+    post:
+      operationId: scanSources
+      summary: Search available public feeds and prepare direct searches
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SearchFilters" }
+      responses:
+        "200":
+          description: Observed feed matches and transparent source coverage
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ScanResult" }
+        "400":
+          description: Invalid search filters
+        "429":
+          description: Too many scans, retry shortly
   /healthz:
     get:
       operationId: healthCheck
@@ -26,6 +57,68 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    SearchFilters:
+      type: object
+      properties:
+        title: { type: string, maxLength: 120, default: "" }
+        city: { type: string, maxLength: 100, default: "" }
+        industry: { type: string, maxLength: 100, default: "" }
+        offerType: { type: string, enum: [all, permanent, contract], default: all }
+    Source:
+      type: object
+      required: [id, name, domain, url, description, countries, category, color, initials, liveSupported]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        domain: { type: string }
+        url: { type: string }
+        description: { type: string }
+        countries: { type: array, items: { type: string } }
+        category: { type: string }
+        color: { type: string }
+        initials: { type: string }
+        liveSupported: { type: boolean }
+    SourceResult:
+      type: object
+      required: [sourceId, count, status, message, searchUrl, checkedAt, countScope]
+      properties:
+        sourceId: { type: string }
+        count: { type: [integer, "null"] }
+        status: { type: string, enum: [live, unavailable, direct] }
+        message: { type: string }
+        searchUrl: { type: string }
+        checkedAt: { type: [string, "null"] }
+        countScope: { type: string }
+    Job:
+      type: object
+      required: [id, sourceId, title, company, location, offerType, industry, url, publishedAt, description, remote]
+      properties:
+        id: { type: string }
+        sourceId: { type: string }
+        title: { type: string }
+        company: { type: string }
+        location: { type: string }
+        offerType: { type: string }
+        industry: { type: string }
+        url: { type: string }
+        publishedAt: { type: [string, "null"] }
+        description: { type: string }
+        remote: { type: boolean }
+    ScanResult:
+      type: object
+      required: [filters, scannedAt, sources, jobs, totalMatches, liveSources, notice]
+      properties:
+        filters: { $ref: "#/components/schemas/SearchFilters" }
+        scannedAt: { type: string }
+        sources:
+          type: array
+          items: { $ref: "#/components/schemas/SourceResult" }
+        jobs:
+          type: array
+          items: { $ref: "#/components/schemas/Job" }
+        totalMatches: { type: integer }
+        liveSources: { type: integer }
+        notice: { type: string }
     HealthStatus:
       type: object
       properties:
