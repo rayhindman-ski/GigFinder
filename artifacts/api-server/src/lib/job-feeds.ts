@@ -23,6 +23,7 @@ interface Feed {
 type RecordValue = Record<string, unknown>;
 const cache = new Map<string, { expires: number; feed?: Feed; error?: string }>();
 const pending = new Map<string, Promise<Feed>>();
+const fullDescriptions = new Map<string, { description: string; truncated: boolean }>();
 
 function text(value: unknown): string {
   const raw = Array.isArray(value) ? value.join(" ") : String(value ?? "");
@@ -60,7 +61,7 @@ function normalize(row: RecordValue, sourceId: string): Job | null {
   const location = text(arbeit ? row.location : jobicy ? row.jobGeo : row.candidate_required_location);
   // The remote boards are global; only include roles that explicitly allow our region.
   if (!arbeit && !/\b(worldwide|anywhere|europe|emea|eu|uk|united kingdom|germany|france|netherlands|belgium|ireland|switzerland|austria|luxembourg|liechtenstein|monaco)\b/i.test(location)) return null;
-  return {
+  const job: Job = {
     id: `${sourceId}-${String(row.id ?? row.slug)}`,
     sourceId, title, company, location: location || "Location not specified",
     offerType: offerType(jobicy ? row.jobType : arbeit ? row.job_types : row.job_type, description),
@@ -70,6 +71,19 @@ function normalize(row: RecordValue, sourceId: string): Job | null {
     description: description.slice(0, 650),
     remote: arbeit ? row.remote === true : true,
   };
+  fullDescriptions.set(job.id, { description: description.slice(0, 40_000), truncated: description.length > 40_000 });
+  // Public source text only; private CV content never enters this feed cache.
+  while (fullDescriptions.size > 2000) fullDescriptions.delete(fullDescriptions.keys().next().value!);
+  return job;
+}
+
+export async function findJobForAssessment(jobId: string) {
+  const sourceId = ["arbeitnow", "remotive", "jobicy"].find(id => jobId.startsWith(`${id}-`));
+  if (!sourceId) return null;
+  const feed = await loadFeed(sourceId);
+  const job = feed.jobs.find(item => item.id === jobId);
+  const detail = fullDescriptions.get(jobId);
+  return job && detail ? { job, ...detail } : null;
 }
 
 async function getJson(url: string): Promise<RecordValue> {

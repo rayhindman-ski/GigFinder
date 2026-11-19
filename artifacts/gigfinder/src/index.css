@@ -438,3 +438,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:60;op
 .ticket-edge{background-image:radial-gradient(circle at 0 50%,hsl(var(--background)) 7px,transparent 8px),radial-gradient(circle at 100% 50%,hsl(var(--background)) 7px,transparent 8px)}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .rise{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+.cl-formFieldInput::placeholder{color:hsl(228 12% 52%);opacity:1}
+.cl-formButtonPrimary:hover{filter:brightness(1.06)}
+.cl-socialButtonsBlockButton:hover{background:hsl(36 24% 90%)}
+.cl-footerActionLink:hover{text-decoration:underline}
+@keyframes sweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.sweep{position:relative;overflow:hidden}
+.sweep::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,hsl(var(--primary)/.18),transparent);animation:sweep 1.4s linear infinite}

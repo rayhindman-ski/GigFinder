@@ -5,6 +5,109 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface CvAccess {
+  signedIn: boolean;
+  allowed: boolean;
+  message: string;
+}
+
+export interface CvFile {
+  id: string;
+  name: string;
+  mimeType: string;
+  webViewLink: string;
+  modifiedTime: string;
+  supported: boolean;
+}
+
+export interface CvFileList {
+  files: CvFile[];
+  folderCount: number;
+  /** @nullable */
+  nextPageToken: string | null;
+  notice: string;
+}
+
+export interface CvSelection {
+  /** @pattern ^[a-zA-Z0-9_-]{1,200}$ */
+  fileId: string;
+}
+
+export type CvSkillCategory = typeof CvSkillCategory[keyof typeof CvSkillCategory];
+
+
+export const CvSkillCategory = {
+  technical: 'technical',
+  domain: 'domain',
+  leadership: 'leadership',
+  language: 'language',
+  other: 'other',
+} as const;
+
+export interface CvSkill {
+  name: string;
+  category: CvSkillCategory;
+  evidence: string;
+}
+
+export interface CvProfile {
+  summary: string;
+  skills: CvSkill[];
+  limitations: string[];
+}
+
+export type RoleFitAlignment = typeof RoleFitAlignment[keyof typeof RoleFitAlignment];
+
+
+export const RoleFitAlignment = {
+  strong: 'strong',
+  partial: 'partial',
+  limited: 'limited',
+  insufficient: 'insufficient',
+} as const;
+
+export interface RoleEvidence {
+  skill: string;
+  evidence: string;
+}
+
+export interface RoleFit {
+  alignment: RoleFitAlignment;
+  summary: string;
+  strengths: RoleEvidence[];
+  gaps: string[];
+  suggestions: string[];
+}
+
+export interface RoleAssessment {
+  cvSessionId: string;
+  jobId: string;
+  title: string;
+  company: string;
+  url: string;
+  fit: RoleFit;
+  limitation: string;
+  assessedAt: string;
+}
+
+export interface CvSession {
+  id: string;
+  file: CvFile;
+  profile: CvProfile;
+  analyzedAt: string;
+  expiresAt: string;
+  assessments: RoleAssessment[];
+}
+
+export interface RoleAssessmentInput {
+  cvSessionId: string;
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  jobId: string;
+}
+
 export type SearchFiltersOfferType = typeof SearchFiltersOfferType[keyof typeof SearchFiltersOfferType];
 
 
@@ -86,4 +189,15 @@ export interface ScanResult {
 export interface HealthStatus {
   status: string;
 }
+
+export type ListCvFilesParams = {
+/**
+ * @maxLength 120
+ */
+search?: string;
+/**
+ * @maxLength 4096
+ */
+pageToken?: string;
+};
 

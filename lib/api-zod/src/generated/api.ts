@@ -9,6 +9,181 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Check signed-in owner access without exposing Drive data
+ */
+export const GetCvAccessResponse = zod.object({
+  "signedIn": zod.boolean(),
+  "allowed": zod.boolean(),
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Search documents directly inside folders named CV
+ */
+export const listCvFilesQuerySearchMax = 120;
+
+export const listCvFilesQueryPageTokenMax = 4096;
+
+
+
+export const ListCvFilesQueryParams = zod.object({
+  "search": zod.coerce.string().max(listCvFilesQuerySearchMax).optional(),
+  "pageToken": zod.coerce.string().max(listCvFilesQueryPageTokenMax).optional()
+})
+
+export const ListCvFilesResponse = zod.object({
+  "files": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "mimeType": zod.string(),
+  "webViewLink": zod.string(),
+  "modifiedTime": zod.string(),
+  "supported": zod.boolean()
+})),
+  "folderCount": zod.number().int(),
+  "nextPageToken": zod.string().nullable(),
+  "notice": zod.string()
+})
+
+
+/**
+ * @summary Read a selected CV and analyze its stated skills
+ */
+export const selectCvBodyFileIdRegExp = new RegExp('^[a-zA-Z0-9_-]{1,200}$');
+
+
+export const SelectCvBody = zod.object({
+  "fileId": zod.string().regex(selectCvBodyFileIdRegExp)
+})
+
+export const SelectCvResponse = zod.object({
+  "id": zod.string(),
+  "file": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "mimeType": zod.string(),
+  "webViewLink": zod.string(),
+  "modifiedTime": zod.string(),
+  "supported": zod.boolean()
+}),
+  "profile": zod.object({
+  "summary": zod.string(),
+  "skills": zod.array(zod.object({
+  "name": zod.string(),
+  "category": zod.enum(['technical', 'domain', 'leadership', 'language', 'other']),
+  "evidence": zod.string()
+})),
+  "limitations": zod.array(zod.string())
+}),
+  "analyzedAt": zod.string(),
+  "expiresAt": zod.string(),
+  "assessments": zod.array(zod.object({
+  "cvSessionId": zod.string(),
+  "jobId": zod.string(),
+  "title": zod.string(),
+  "company": zod.string(),
+  "url": zod.string(),
+  "fit": zod.object({
+  "alignment": zod.enum(['strong', 'partial', 'limited', 'insufficient']),
+  "summary": zod.string(),
+  "strengths": zod.array(zod.object({
+  "skill": zod.string(),
+  "evidence": zod.string()
+})),
+  "gaps": zod.array(zod.string()),
+  "suggestions": zod.array(zod.string())
+}),
+  "limitation": zod.string(),
+  "assessedAt": zod.string()
+}))
+})
+
+
+/**
+ * @summary Restore the owner's unexpired CV and assessments
+ */
+export const GetCvSessionParams = zod.object({
+  "sessionId": zod.coerce.string().uuid()
+})
+
+export const GetCvSessionResponse = zod.object({
+  "id": zod.string(),
+  "file": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "mimeType": zod.string(),
+  "webViewLink": zod.string(),
+  "modifiedTime": zod.string(),
+  "supported": zod.boolean()
+}),
+  "profile": zod.object({
+  "summary": zod.string(),
+  "skills": zod.array(zod.object({
+  "name": zod.string(),
+  "category": zod.enum(['technical', 'domain', 'leadership', 'language', 'other']),
+  "evidence": zod.string()
+})),
+  "limitations": zod.array(zod.string())
+}),
+  "analyzedAt": zod.string(),
+  "expiresAt": zod.string(),
+  "assessments": zod.array(zod.object({
+  "cvSessionId": zod.string(),
+  "jobId": zod.string(),
+  "title": zod.string(),
+  "company": zod.string(),
+  "url": zod.string(),
+  "fit": zod.object({
+  "alignment": zod.enum(['strong', 'partial', 'limited', 'insufficient']),
+  "summary": zod.string(),
+  "strengths": zod.array(zod.object({
+  "skill": zod.string(),
+  "evidence": zod.string()
+})),
+  "gaps": zod.array(zod.string()),
+  "suggestions": zod.array(zod.string())
+}),
+  "limitation": zod.string(),
+  "assessedAt": zod.string()
+}))
+})
+
+
+/**
+ * @summary Assess one role from a public feed against the selected CV
+ */
+export const assessRoleBodyJobIdMax = 500;
+
+
+
+export const AssessRoleBody = zod.object({
+  "cvSessionId": zod.string().uuid(),
+  "jobId": zod.string().min(1).max(assessRoleBodyJobIdMax)
+})
+
+export const AssessRoleResponse = zod.object({
+  "cvSessionId": zod.string(),
+  "jobId": zod.string(),
+  "title": zod.string(),
+  "company": zod.string(),
+  "url": zod.string(),
+  "fit": zod.object({
+  "alignment": zod.enum(['strong', 'partial', 'limited', 'insufficient']),
+  "summary": zod.string(),
+  "strengths": zod.array(zod.object({
+  "skill": zod.string(),
+  "evidence": zod.string()
+})),
+  "gaps": zod.array(zod.string()),
+  "suggestions": zod.array(zod.string())
+}),
+  "limitation": zod.string(),
+  "assessedAt": zod.string()
+})
+
+
+/**
  * @summary Curated Western European job sources
  */
 export const GetSourcesResponseItem = zod.object({

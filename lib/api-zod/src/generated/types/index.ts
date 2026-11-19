@@ -6,8 +6,22 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './cvAccess';
+export * from './cvFile';
+export * from './cvFileList';
+export * from './cvProfile';
+export * from './cvSelection';
+export * from './cvSession';
+export * from './cvSkill';
+export * from './cvSkillCategory';
 export * from './healthStatus';
 export * from './job';
+export * from './listCvFilesParams';
+export * from './roleAssessment';
+export * from './roleAssessmentInput';
+export * from './roleEvidence';
+export * from './roleFit';
+export * from './roleFitAlignment';
 export * from './scanResult';
 export * from './searchFilters';
 export * from './searchFiltersOfferType';

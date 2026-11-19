@@ -11,6 +11,7 @@ A Western European job-source comparison and follow-up website.
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Job discovery uses public APIs; no database or provider secret is needed for the current feature.
+- CV tools use the connected Google Drive plus Replit-managed Clerk and OpenAI access; public job browsing remains unauthenticated.
 
 ## Stack
 
@@ -36,12 +37,17 @@ A Western European job-source comparison and follow-up website.
 - Full-time describes hours, not duration; do not infer permanent from full-time.
 - Remotive permits only a few refreshes per day. Keep at least six hours between upstream refreshes and retain attribution/source links. Before horizontal scaling, make cache and request coordination shared and durable.
 - Follow-up saves are browser-only in this version; no local authentication or account syncing is implied.
+- The connected Drive is the creator's private account, not a separate Drive per app visitor. Never grant its documents to every signed-in user or use "first account wins" ownership. Private endpoints must require a verified sign-in email matching the currently connected Drive identity.
+- CV text and AI outputs are temporary, owner-scoped server-memory snapshots (30-minute fixed lifetime; restarts clear them). Never log, commit, or persist CV contents in browser storage. Only the opaque session reference is restored from per-user sessionStorage.
+- Role comparisons must use source-provided descriptions, not only card snippets; disclose limitations and use exact CV quotes for supporting evidence. Missing evidence is not proof of missing ability.
 
 ## Product
 
 - Search available feeds by job title, city, industry and offer type.
 - Compare source counts and browse the 25-board directory.
 - Save job cards and source searches for follow-up.
+- Search documents directly inside Google Drive folders named `CV`, select and open a CV, and populate its summary and evidenced skills.
+- Select multiple roles independently of heart saves; trigger a separate assessment against the selected CV for each.
 - See README for coverage limitations and provider documentation.
 
 ## User preferences

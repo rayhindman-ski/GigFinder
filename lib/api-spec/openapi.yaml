@@ -11,6 +11,101 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /cv/access:
+    get:
+      operationId: getCvAccess
+      summary: Check signed-in owner access without exposing Drive data
+      responses:
+        "200":
+          description: Access status
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CvAccess" }
+        "502": { description: Owner verification unavailable }
+  /cv/files:
+    get:
+      operationId: listCvFiles
+      summary: Search documents directly inside folders named CV
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string, maxLength: 120 }
+        - in: query
+          name: pageToken
+          schema: { type: string, maxLength: 4096 }
+      responses:
+        "200":
+          description: Private document results
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CvFileList" }
+        "400": { description: Invalid search parameters }
+        "401": { description: Sign in required }
+        "403": { description: Connected Drive owner only }
+        "502": { description: Drive unavailable }
+  /cv/select:
+    post:
+      operationId: selectCv
+      summary: Read a selected CV and analyze its stated skills
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CvSelection" }
+      responses:
+        "200":
+          description: Owner-scoped CV session, kept in server memory for thirty minutes
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CvSession" }
+        "400": { description: Invalid document }
+        "401": { description: Sign in required }
+        "403": { description: Connected Drive owner only }
+        "404": { description: Document no longer available }
+        "422": { description: Unsupported or unreadable document }
+        "429": { description: Analysis limit reached }
+        "502": { description: Drive or analysis unavailable }
+  /cv/sessions/{sessionId}:
+    get:
+      operationId: getCvSession
+      summary: Restore the owner's unexpired CV and assessments
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: CV session
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CvSession" }
+        "400": { description: Invalid session reference }
+        "401": { description: Sign in required }
+        "403": { description: Connected Drive owner only }
+        "404": { description: Session expired or not found }
+        "502": { description: Owner verification unavailable }
+  /cv/assessments:
+    post:
+      operationId: assessRole
+      summary: Assess one role from a public feed against the selected CV
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RoleAssessmentInput" }
+      responses:
+        "200":
+          description: Evidence-based role assessment
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RoleAssessment" }
+        "400": { description: Invalid selection }
+        "401": { description: Sign in required }
+        "403": { description: Connected Drive owner only }
+        "404": { description: CV expired or role no longer in feed }
+        "429": { description: Analysis limit reached }
+        "502": { description: Analysis unavailable }
   /sources:
     get:
       operationId: getSources
@@ -57,6 +152,97 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    CvAccess:
+      type: object
+      required: [signedIn, allowed, message]
+      properties:
+        signedIn: { type: boolean }
+        allowed: { type: boolean }
+        message: { type: string }
+    CvFile:
+      type: object
+      required: [id, name, mimeType, webViewLink, modifiedTime, supported]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        mimeType: { type: string }
+        webViewLink: { type: string }
+        modifiedTime: { type: string }
+        supported: { type: boolean }
+    CvFileList:
+      type: object
+      required: [files, folderCount, nextPageToken, notice]
+      properties:
+        files: { type: array, items: { $ref: "#/components/schemas/CvFile" } }
+        folderCount: { type: integer }
+        nextPageToken: { type: [string, "null"] }
+        notice: { type: string }
+    CvSelection:
+      type: object
+      required: [fileId]
+      properties:
+        fileId: { type: string, pattern: "^[a-zA-Z0-9_-]{1,200}$" }
+    CvSkill:
+      type: object
+      additionalProperties: false
+      required: [name, category, evidence]
+      properties:
+        name: { type: string }
+        category: { type: string, enum: [technical, domain, leadership, language, other] }
+        evidence: { type: string }
+    CvProfile:
+      type: object
+      additionalProperties: false
+      required: [summary, skills, limitations]
+      properties:
+        summary: { type: string }
+        skills: { type: array, items: { $ref: "#/components/schemas/CvSkill" } }
+        limitations: { type: array, items: { type: string } }
+    CvSession:
+      type: object
+      required: [id, file, profile, analyzedAt, expiresAt, assessments]
+      properties:
+        id: { type: string }
+        file: { $ref: "#/components/schemas/CvFile" }
+        profile: { $ref: "#/components/schemas/CvProfile" }
+        analyzedAt: { type: string }
+        expiresAt: { type: string }
+        assessments: { type: array, items: { $ref: "#/components/schemas/RoleAssessment" } }
+    RoleAssessmentInput:
+      type: object
+      required: [cvSessionId, jobId]
+      properties:
+        cvSessionId: { type: string, format: uuid }
+        jobId: { type: string, minLength: 1, maxLength: 500 }
+    RoleEvidence:
+      type: object
+      additionalProperties: false
+      required: [skill, evidence]
+      properties:
+        skill: { type: string }
+        evidence: { type: string }
+    RoleFit:
+      type: object
+      additionalProperties: false
+      required: [alignment, summary, strengths, gaps, suggestions]
+      properties:
+        alignment: { type: string, enum: [strong, partial, limited, insufficient] }
+        summary: { type: string }
+        strengths: { type: array, items: { $ref: "#/components/schemas/RoleEvidence" } }
+        gaps: { type: array, items: { type: string } }
+        suggestions: { type: array, items: { type: string } }
+    RoleAssessment:
+      type: object
+      required: [cvSessionId, jobId, title, company, url, fit, limitation, assessedAt]
+      properties:
+        cvSessionId: { type: string }
+        jobId: { type: string }
+        title: { type: string }
+        company: { type: string }
+        url: { type: string }
+        fit: { $ref: "#/components/schemas/RoleFit" }
+        limitation: { type: string }
+        assessedAt: { type: string }
     SearchFilters:
       type: object
       properties:

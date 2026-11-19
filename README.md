@@ -9,6 +9,22 @@ A job-discovery workspace for Western Europe: compare 25 curated job boards, fil
 - Observed matching counts by source, with unavailable counts kept distinct from zero.
 - Direct-search links for boards without approved data access.
 - Saved jobs and source searches stored in the current browser.
+- A private Google Drive `CV` document picker, AI summary, and evidenced skills breakdown.
+- Independent role selection that triggers a CV-based assessment per role.
+
+## Private CV workspace
+
+Open **CV** and sign in with a verified email matching the connected Google Drive account. Other signed-in accounts cannot browse its documents. Public job browsing and heart saves remain available without sign-in.
+
+The filename search looks directly inside folders named `CV`, with pagination. Open documents in Drive or select one for analysis. Google Docs, text-based PDF, DOCX, plain text, and Markdown are supported, up to 5 MB and 120,000 extracted characters. Images, legacy `.doc`, shortcuts, subfolders, and scanned PDFs without a readable text layer are not analyzed.
+
+Selecting a document sends its extracted text to OpenAI through Replit AI Integrations. No personal API key is required; analysis uses billed Replit credits. The summary and categorized skills cite evidence from that document. AI output is advisory and can be wrong.
+
+With a CV selected, use **Compare to CV** on Discover or Saved, or select roles from the latest scan inside the CV workspace. Each selection starts its own assessment; up to ten roles can be selected at once, with two requests running concurrently. Results show evidenced strengths, requirements not evidenced in the CV, and suggested application improvements. Assessments use the fuller public-feed description, not just the short listing-card preview. Source omissions and descriptions shortened above 40,000 characters are disclosed.
+
+CV text and results stay in owner-scoped server memory for a fixed 30 minutes. A server restart clears them sooner. This tab stores only a user-scoped opaque session reference, never CV text or assessment contents, and can restore completed results while the session exists. Selecting another CV clears the visible old comparison state. Failed roles can be retried independently. Limits are 30 assessments per CV session and 60 analysis requests per hour per owner, enforced per process.
+
+The app uses one creator-connected Drive, not a different Drive per visitor. Do not broaden access to all signed-in users. Horizontal scaling requires shared private session/rate-limit coordination or single-instance operation.
 
 ## Coverage and interpretation
 

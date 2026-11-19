@@ -1,13 +1,16 @@
 import { type ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
 import { motion } from 'framer-motion';
-import { Compass, Heart, LayoutGrid } from 'lucide-react';
+import { Compass, Heart, LayoutGrid, FileText, LogIn, LogOut } from 'lucide-react';
+import { Show, useClerk } from '@clerk/react';
+import { useCv } from '@/hooks/use-cv';
 import { useSaved } from '@/hooks/use-saved';
 import { useScan } from '@/hooks/use-scan';
 import { cn } from '@/lib/utils';
 
 const NAV = [
-  { href: '/', label: 'Discover', icon: Compass },
+  { href: '/discover', label: 'Discover', icon: Compass },
+  { href: '/cv', label: 'CV', icon: FileText },
   { href: '/saved', label: 'Saved', icon: Heart },
   { href: '/sources', label: 'Sources', icon: LayoutGrid },
 ];
@@ -16,6 +19,10 @@ export function Layout({ children }: { children: ReactNode }) {
   const [loc] = useLocation();
   const { jobs, searches } = useSaved();
   const { isPending } = useScan();
+  const { roles } = useCv();
+  const cvCount = roles.length;
+  const { signOut } = useClerk();
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   const pendingFollow = jobs.filter((j) => !j.followedUp).length + searches.filter((s) => !s.followedUp).length;
 
   return (
@@ -31,13 +38,16 @@ export function Layout({ children }: { children: ReactNode }) {
           </Link>
           <nav className="ml-auto hidden items-center gap-1 rounded-full border bg-card p-1 md:flex">
             {NAV.map((n) => {
-              const active = n.href === '/' ? loc === '/' : loc.startsWith(n.href);
+              const active = n.href === '/discover' ? loc === '/' || loc.startsWith('/discover') : loc.startsWith(n.href);
               return (
                 <Link key={n.href} href={n.href} data-testid={`link-nav-${n.label.toLowerCase()}`}
                   className={cn('relative flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors', active ? 'text-secondary-foreground' : 'text-muted-foreground hover:text-foreground')}>
                   {active && <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-full bg-secondary" transition={{ type: 'spring', stiffness: 400, damping: 32 }} />}
                   <n.icon className="relative h-4 w-4" />
                   <span className="relative">{n.label}</span>
+                  {n.href === '/cv' && cvCount > 0 && (
+                    <span className="relative rounded-full bg-[#61A9BD] px-1.5 font-mono text-[10px] text-[hsl(196_45%_14%)]" data-testid="text-cv-role-count">{cvCount}</span>
+                  )}
                   {n.href === '/saved' && pendingFollow > 0 && (
                     <span className="relative rounded-full bg-primary px-1.5 font-mono text-[10px] text-primary-foreground" data-testid="text-followup-count">{pendingFollow}</span>
                   )}
@@ -47,20 +57,26 @@ export function Layout({ children }: { children: ReactNode }) {
           </nav>
           <div className="ml-auto flex items-center gap-2 font-mono text-[11px] text-muted-foreground md:ml-3">
             <span className={cn('h-2 w-2 rounded-full', isPending ? 'animate-pulse bg-primary' : 'bg-[#61A9BD]')} />
-            {isPending ? 'scanning' : 'ready'}
+            <span className="hidden sm:inline">{isPending ? 'scanning' : 'ready'}</span>
           </div>
+          <Show when="signed-out">
+            <Link href="/sign-in" data-testid="link-sign-in" className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3.5 py-2 text-sm font-medium text-secondary-foreground"><LogIn className="h-3.5 w-3.5" /> Sign in</Link>
+          </Show>
+          <Show when="signed-in">
+            <button type="button" onClick={() => signOut({ redirectUrl: base || '/' })} data-testid="button-sign-out" className="inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm text-muted-foreground hover:text-foreground"><LogOut className="h-3.5 w-3.5" /><span className="hidden sm:inline">Sign out</span></button>
+          </Show>
         </div>
       </header>
       <main className="mx-auto max-w-7xl px-4 pb-28 pt-6 sm:px-6 md:pb-16">{children}</main>
-      <nav className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-3 rounded-2xl border bg-secondary p-1.5 text-secondary-foreground shadow-lg md:hidden">
+      <nav className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-4 rounded-2xl border bg-secondary p-1.5 text-secondary-foreground shadow-lg md:hidden">
         {NAV.map((n) => {
-          const active = n.href === '/' ? loc === '/' : loc.startsWith(n.href);
+          const active = n.href === '/discover' ? loc === '/' || loc.startsWith('/discover') : loc.startsWith(n.href);
           return (
             <Link key={n.href} href={n.href} data-testid={`link-mobile-${n.label.toLowerCase()}`}
               className={cn('relative flex flex-col items-center gap-0.5 rounded-xl py-2 text-[11px] font-medium', active ? 'text-secondary' : 'opacity-70')}>
               {active && <motion.span layoutId="mnav-pill" className="absolute inset-0 rounded-xl bg-background" />}
               <n.icon className="relative h-4 w-4" />
-              <span className="relative">{n.label}{n.href === '/saved' && pendingFollow > 0 ? ` ${pendingFollow}` : ''}</span>
+              <span className="relative">{n.label}{n.href === '/saved' && pendingFollow > 0 ? ` ${pendingFollow}` : ''}{n.href === '/cv' && cvCount > 0 ? ` ${cvCount}` : ''}</span>
             </Link>
           );
         })}

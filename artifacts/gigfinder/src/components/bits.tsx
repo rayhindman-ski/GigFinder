@@ -4,6 +4,7 @@ import { Heart, ExternalLink, MapPin, Building2, Trash2, Check } from 'lucide-re
 import { formatDistanceToNow } from 'date-fns';
 import type { Job, SearchFilters, Source } from '@workspace/api-client-react';
 import { cn } from '@/lib/utils';
+import { RoleAssessmentControl } from '@/components/role-assessment';
 
 export function SourceMark({ source, size = 36 }: { source?: Source; size?: number }) {
   return (
@@ -116,6 +117,7 @@ export function JobCard({ job, source, saved, onToggle, followedUp, onFollowed, 
               </button>
             )}
           </div>
+          <div className="mt-3"><RoleAssessmentControl job={job} /></div>
         </div>
         <HeartButton active={saved} onToggle={onToggle} label={job.title} testId={`button-save-job-${job.id}`} />
       </div>

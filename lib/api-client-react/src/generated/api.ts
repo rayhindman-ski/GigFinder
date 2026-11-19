@@ -25,7 +25,14 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  CvAccess,
+  CvFileList,
+  CvSelection,
+  CvSession,
   HealthStatus,
+  ListCvFilesParams,
+  RoleAssessment,
+  RoleAssessmentInput,
   ScanResult,
   SearchFilters,
   Source
@@ -57,6 +64,492 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getGetCvAccessUrl = () => {
+
+
+
+
+  return `/api/cv/access`
+}
+
+/**
+ * @summary Check signed-in owner access without exposing Drive data
+ */
+export const getCvAccess = async ( options?: Parameters<typeof customFetch>[1]): Promise<CvAccess> => {
+
+  return customFetch<CvAccess>(getGetCvAccessUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCvAccessQueryKey = () => {
+    return [
+    `/api/cv/access`
+    ] as const;
+    }
+
+
+export const getGetCvAccessQueryOptions = <TData = Awaited<ReturnType<typeof getCvAccess>>, TError = ErrorType<void>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCvAccess>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCvAccessQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCvAccess>>> = ({ signal }) => getCvAccess({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCvAccess>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetCvAccessQueryResult = NonNullable<Awaited<ReturnType<typeof getCvAccess>>>
+export type GetCvAccessQueryError = ErrorType<void>
+
+
+export function useGetCvAccess<TData = Awaited<ReturnType<typeof getCvAccess>>, TError = ErrorType<void>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCvAccess>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCvAccess>>,
+          TError,
+          Awaited<ReturnType<typeof getCvAccess>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCvAccess<TData = Awaited<ReturnType<typeof getCvAccess>>, TError = ErrorType<void>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCvAccess>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCvAccess>>,
+          TError,
+          Awaited<ReturnType<typeof getCvAccess>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCvAccess<TData = Awaited<ReturnType<typeof getCvAccess>>, TError = ErrorType<void>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCvAccess>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Check signed-in owner access without exposing Drive data
+ */
+
+export function useGetCvAccess<TData = Awaited<ReturnType<typeof getCvAccess>>, TError = ErrorType<void>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCvAccess>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetCvAccessQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListCvFilesUrl = (params?: ListCvFilesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/cv/files?${stringifiedParams}` : `/api/cv/files`
+}
+
+/**
+ * @summary Search documents directly inside folders named CV
+ */
+export const listCvFiles = async (params?: ListCvFilesParams, options?: Parameters<typeof customFetch>[1]): Promise<CvFileList> => {
+
+  return customFetch<CvFileList>(getListCvFilesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListCvFilesQueryKey = (params?: ListCvFilesParams,) => {
+    return [
+    `/api/cv/files`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListCvFilesQueryOptions = <TData = Awaited<ReturnType<typeof listCvFiles>>, TError = ErrorType<void>>(params?: ListCvFilesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCvFiles>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListCvFilesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCvFiles>>> = ({ signal }) => listCvFiles(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listCvFiles>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListCvFilesQueryResult = NonNullable<Awaited<ReturnType<typeof listCvFiles>>>
+export type ListCvFilesQueryError = ErrorType<void>
+
+
+export function useListCvFiles<TData = Awaited<ReturnType<typeof listCvFiles>>, TError = ErrorType<void>>(
+ params: undefined |  ListCvFilesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCvFiles>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCvFiles>>,
+          TError,
+          Awaited<ReturnType<typeof listCvFiles>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListCvFiles<TData = Awaited<ReturnType<typeof listCvFiles>>, TError = ErrorType<void>>(
+ params?: ListCvFilesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCvFiles>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCvFiles>>,
+          TError,
+          Awaited<ReturnType<typeof listCvFiles>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListCvFiles<TData = Awaited<ReturnType<typeof listCvFiles>>, TError = ErrorType<void>>(
+ params?: ListCvFilesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCvFiles>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Search documents directly inside folders named CV
+ */
+
+export function useListCvFiles<TData = Awaited<ReturnType<typeof listCvFiles>>, TError = ErrorType<void>>(
+ params?: ListCvFilesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCvFiles>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListCvFilesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSelectCvUrl = () => {
+
+
+
+
+  return `/api/cv/select`
+}
+
+/**
+ * @summary Read a selected CV and analyze its stated skills
+ */
+export const selectCv = async (cvSelection: CvSelection, options?: Parameters<typeof customFetch>[1]): Promise<CvSession> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<CvSession>(getSelectCvUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(cvSelection)
+  }
+);}
+
+
+
+
+
+export const getSelectCvMutationKey = () => ['selectCv'] as const;
+
+export const getSelectCvMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof selectCv>>, TError,SelectCvMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof selectCv>>, TError,SelectCvMutationVariables, TContext> => {
+
+const mutationKey = getSelectCvMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof selectCv>>, SelectCvMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  selectCv(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SelectCvMutationResult = NonNullable<Awaited<ReturnType<typeof selectCv>>>
+    export type SelectCvMutationBody = BodyType<CvSelection>
+    export type SelectCvMutationError = ErrorType<void>
+    export type SelectCvMutationVariables = {data: BodyType<CvSelection>}
+
+    /**
+ * @summary Read a selected CV and analyze its stated skills
+ */
+export const useSelectCv = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof selectCv>>, TError,SelectCvMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof selectCv>>,
+        TError,
+        SelectCvMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSelectCvMutationOptions(options), queryClient);
+    }
+
+export const getGetCvSessionUrl = (sessionId: string,) => {
+
+
+
+
+  return `/api/cv/sessions/${sessionId}`
+}
+
+/**
+ * @summary Restore the owner's unexpired CV and assessments
+ */
+export const getCvSession = async (sessionId: string, options?: Parameters<typeof customFetch>[1]): Promise<CvSession> => {
+
+  return customFetch<CvSession>(getGetCvSessionUrl(sessionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCvSessionQueryKey = (sessionId: string,) => {
+    return [
+    `/api/cv/sessions/${sessionId}`
+    ] as const;
+    }
+
+
+export const getGetCvSessionQueryOptions = <TData = Awaited<ReturnType<typeof getCvSession>>, TError = ErrorType<void>>(sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCvSession>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCvSessionQueryKey(sessionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCvSession>>> = ({ signal }) => getCvSession(sessionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: sessionId !== null && sessionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCvSession>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetCvSessionQueryResult = NonNullable<Awaited<ReturnType<typeof getCvSession>>>
+export type GetCvSessionQueryError = ErrorType<void>
+
+
+export function useGetCvSession<TData = Awaited<ReturnType<typeof getCvSession>>, TError = ErrorType<void>>(
+ sessionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCvSession>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCvSession>>,
+          TError,
+          Awaited<ReturnType<typeof getCvSession>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCvSession<TData = Awaited<ReturnType<typeof getCvSession>>, TError = ErrorType<void>>(
+ sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCvSession>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCvSession>>,
+          TError,
+          Awaited<ReturnType<typeof getCvSession>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCvSession<TData = Awaited<ReturnType<typeof getCvSession>>, TError = ErrorType<void>>(
+ sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCvSession>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Restore the owner's unexpired CV and assessments
+ */
+
+export function useGetCvSession<TData = Awaited<ReturnType<typeof getCvSession>>, TError = ErrorType<void>>(
+ sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCvSession>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetCvSessionQueryOptions(sessionId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getAssessRoleUrl = () => {
+
+
+
+
+  return `/api/cv/assessments`
+}
+
+/**
+ * @summary Assess one role from a public feed against the selected CV
+ */
+export const assessRole = async (roleAssessmentInput: RoleAssessmentInput, options?: Parameters<typeof customFetch>[1]): Promise<RoleAssessment> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RoleAssessment>(getAssessRoleUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(roleAssessmentInput)
+  }
+);}
+
+
+
+
+
+export const getAssessRoleMutationKey = () => ['assessRole'] as const;
+
+export const getAssessRoleMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof assessRole>>, TError,AssessRoleMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof assessRole>>, TError,AssessRoleMutationVariables, TContext> => {
+
+const mutationKey = getAssessRoleMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof assessRole>>, AssessRoleMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  assessRole(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AssessRoleMutationResult = NonNullable<Awaited<ReturnType<typeof assessRole>>>
+    export type AssessRoleMutationBody = BodyType<RoleAssessmentInput>
+    export type AssessRoleMutationError = ErrorType<void>
+    export type AssessRoleMutationVariables = {data: BodyType<RoleAssessmentInput>}
+
+    /**
+ * @summary Assess one role from a public feed against the selected CV
+ */
+export const useAssessRole = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof assessRole>>, TError,AssessRoleMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof assessRole>>,
+        TError,
+        AssessRoleMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAssessRoleMutationOptions(options), queryClient);
+    }
 
 export const getGetSourcesUrl = () => {
 
